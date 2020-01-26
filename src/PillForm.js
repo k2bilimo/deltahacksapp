@@ -7,7 +7,7 @@ import {
 import{TimeInput} from 'semantic-ui-calendar-react'
 import React, { Component } from 'react';
 import TimeList from './TimeList'
-
+import axios from "axios"
 class PillForm extends Component {
     constructor(props){
         super(props);
@@ -17,7 +17,7 @@ class PillForm extends Component {
             Time:'',
             Times : []
         };
-        this.onSubmit = this.handleSubmit.bind(this);
+  //      this.onSubmit = this.handleSubmit.bind(this);
     }
     handleChange = (event, {name, value}) => {
         if (this.state.hasOwnProperty(name)) {
@@ -34,7 +34,7 @@ class PillForm extends Component {
         }
         if(check === true){
             this.state.Times.push(this.state.Time)
-        this.setState({Times: this.state.Times});
+        this.setState({Times: this.state.Times, name: this.state.name, PillDescription:this.state.PillDescription});
         }
     }
     onTimeRemove = (time) =>{
@@ -46,13 +46,47 @@ class PillForm extends Component {
             }
         }
     }
-    handleSubmit = (event) => {
-
+    postinfo = () => {
+        axios.defaults.baseURL = 'http://localhost:5000/api/pills';
+       /* axios.defaults.headers = {
+            "Access-Control-Allow-Origin" : "*",
+            "crossDomain": "true"
+        }*/
+        let payload = JSON.stringify({
+            name: this.state.PillName,
+            Description: this.state.PillDescription,
+            Times : this.state.Times
+        })
+        console.log(payload)
+        axios.post(`/api/pills`,payload,{
+            headers: {'Content-Type': 'application/json',}},).then(function (response) {
+            
+            console.log(response.status);
+          })
+          .catch(function (error) {
+              
+            console.log(error.stringify);
+          });
+          return axios(`/api/pills`, {
+            method: 'POST',
+            data: payload,
+            mode: 'no-cors',
+            headers: {
+              'Access-Control-Allow-Origin': '*',
+              'Content-Type': 'application/json',
+            },
+            withCredentials: true,
+            credentials: 'same-origin',
+          }).then(response => {
+              console.log(response)
+          }).catch(error => {
+              console.log(error)
+          })
     }
     render(){
         return(
     <Container>
-    <Form onSubmit={this.onSubmit} inverted size={'huge'} key={'huge'} style={{ marginTop : '5em', marginLeft: '3em' }}>
+    <Form inverted size={'huge'} key={'huge'} style={{ marginTop : '5em', marginLeft: '3em' }}>
     <Form.Field>
     <Form.Input  name='PillName' fluid label='Pill Name' placeholder='Pill Name' width={10} onChange={this.handleChange}/>
     </Form.Field>
@@ -61,9 +95,9 @@ class PillForm extends Component {
     </Form.Field>
     <Form.Group widths="12">
         <TimeInput  name="Time" placeholder="Time" value ={this.state.Time} onChange={this.handleChange}></TimeInput>
-        <Button onClick={this.addTime}>Add</Button>
+        <Button  onClick={this.addTime}>Add</Button>
     </Form.Group>
-    <Button type='submit' onClick={this.handleSubmit} >Submit</Button>
+    <Button onClick={this.postinfo} >Submit</Button>
     
 </Form>
 <TimeList list ={this.state.Times} onTimeRemove = {this.onTimeRemove}/>
