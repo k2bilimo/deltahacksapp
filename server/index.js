@@ -3,9 +3,12 @@ const path = require('path')
 const bodyParser = require('body-parser')
 const ENV = process.env.NODE_ENV
 const PORT = process.env.PORT || 5000
-const cors = require('cors')
 const app = express()
+const assert = require("assert")
 var router = express.Router();
+const MongoClient = require('mongodb').MongoClient;
+const uri = "mongodb+srv://Abi:12345@deltahacks6-1mdlh.gcp.mongodb.net/test?retryWrites=true&w=majority";
+
 var options = {
     dotfiles: 'ignore',
     etag: false,
@@ -28,25 +31,23 @@ app.get('/', (req, res) => {
   });
 
 
-  app.post(`/api/pills`,cors(),function(req, res, next){
-    console.log("Wowza")
-    return res.send('Received a POST HTTP method');
-    
+  app.post(`/api/pills`,function(req, res, next){
+    console.log(req.body)
+    const client = new MongoClient(uri, { useNewUrlParser: true});
+    client.connect(err => {
+      var collection = client.db("DeltaHacks6DB").collection("Pills");
+      
+      collection.insertOne({index: 4 , name: req.body.name, description: req.body.description, isDispensed: req.body.isDispensed, times: req.body.Times}, function(err, result){
+        console.log(err)
+        assert.equal(err, null)
+        assert.equal(1, result.insertedCount)
+        console.log(result)
+      })
+      // perform actions on the collection object
+      client.close();
 })
-
-/*app.set('/', '../src')
-
-const api = require('./api')
-app.use('/api', api);
-/*client.connect(err => {
-  const collection = client.db("test").collection("devices");
-  // perform actions on the collection object
-  client.close();
-const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://Abi:<12345>@deltahacks6-1mdlh.gcp.mongodb.net/test?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true });
-
-});*/
+return res.send(`Successfully sent ${req.body} to the mongoDB`);
+});
 //app.set('views', '/Users/Kapil/Desktop/Side Stuff/DeltaHacks/deltahacksapp/src');
 console.log(__dirname)
 app.listen(PORT, () => {

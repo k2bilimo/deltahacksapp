@@ -47,7 +47,7 @@ class PillForm extends Component {
         }
     }
     postinfo = () => {
-        axios.defaults.baseURL = 'http://localhost:5000/api/pills';
+        axios.defaults.baseURL = 'http://localhost:5000';
        /* axios.defaults.headers = {
             "Access-Control-Allow-Origin" : "*",
             "crossDomain": "true"
@@ -55,33 +55,20 @@ class PillForm extends Component {
         let payload = JSON.stringify({
             name: this.state.PillName,
             Description: this.state.PillDescription,
-            Times : this.state.Times
+            Times : this.state.Times,
+            isDispensed: false
         })
         console.log(payload)
-        axios.post(`/api/pills`,payload,{
-            headers: {'Content-Type': 'application/json',}},).then(function (response) {
-            
-            console.log(response.status);
+        axios.post(`/api/pills`,payload,).then(function (response) {
+            //{headers: {'Content-Type': 'application/json',}},
+            console.log(response);
+            this.setState({PillName:'', PillDescription : '', Times : [], Time : ''})
+            window.location.reload()
           })
           .catch(function (error) {
               
             console.log(error.stringify);
           });
-          return axios(`/api/pills`, {
-            method: 'POST',
-            data: payload,
-            mode: 'no-cors',
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-              'Content-Type': 'application/json',
-            },
-            withCredentials: true,
-            credentials: 'same-origin',
-          }).then(response => {
-              console.log(response)
-          }).catch(error => {
-              console.log(error)
-          })
     }
     render(){
         return(
@@ -95,9 +82,10 @@ class PillForm extends Component {
     </Form.Field>
     <Form.Group widths="12">
         <TimeInput  name="Time" placeholder="Time" value ={this.state.Time} onChange={this.handleChange}></TimeInput>
-        <Button  onClick={this.addTime}>Add</Button>
+        <Button size="huge" onClick={this.addTime}>Add</Button>
+        <Button size = 'huge' onClick={this.postinfo} >Submit</Button>
     </Form.Group>
-    <Button onClick={this.postinfo} >Submit</Button>
+    
     
 </Form>
 <TimeList list ={this.state.Times} onTimeRemove = {this.onTimeRemove}/>
